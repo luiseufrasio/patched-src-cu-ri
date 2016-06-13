@@ -37,6 +37,9 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
+
+// Portions Copyright [2016] [C2B2 Consulting Ltd and/or its affiliates]
+
 package org.glassfish.enterprise.concurrent;
 
 import java.util.ArrayList;
@@ -492,4 +495,66 @@ extends AbstractExecutorService implements ManagedExecutorService {
      * @return the number of tasks
      */
     public abstract long getCompletedTaskCount();
+    
+    /**
+     * Returns the the core number of threads.
+     * @return the core number of threads.
+     */
+    public abstract int getCorePoolSize();
+    
+    /**
+     * Returns the approximate number of threads that are actively 
+     * executing tasks.
+     * @return the number of threads.
+     */
+    public abstract int getActiveCount();
+    
+    /**
+     * Returns the thread keep-alive time in milliseconds, which is the amount 
+     * of time that threads in excess of the core pool size may remain idle 
+     * before being terminated.
+     * @return the time in milliseconds.
+     */
+    public abstract long getKeepAliveTime();
+    
+    /**
+     * Returns the largest number of threads that have ever simultaneously 
+     * been in the pool.
+     * @return the number of threads.
+     */
+    public abstract int getLargestPoolSize();
+        
+    /**
+     * Returns the maximum allowed number of threads.
+     * @return the number of threads.
+     */
+    public abstract int getMaximumPoolSize();
+    
+    /**
+     * Returns the current number of threads in the pool.
+     * @return the number of threads.
+     */
+    public abstract int getPoolSize();
+    
+    /**
+     * Returns the task queue used by this executor. 
+     * Each element of this queue is a ScheduledFuture, including those tasks 
+     * submitted using execute which are for scheduling purposes used as the 
+     * basis of a zero-delay ScheduledFuture. Iteration over this queue is not 
+     * guaranteed to traverse tasks in the order in which they will execute.
+     * @return the task queue.
+     */
+    public abstract BlockingQueue getBlockingQueue();
+    
+    /**
+     * Returns the current handler for unexecutable tasks.
+     * @return the current handler.
+     */
+    public abstract RejectedExecutionHandler getRejectedExecutionHandler();
+    
+    /**
+     * Returns the thread factory used to create new threads.
+     * @return the current thread factory.
+     */
+    public abstract ThreadFactory getThreadFactory();
 }
