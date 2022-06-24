@@ -390,7 +390,7 @@ extends AbstractExecutorService implements ManagedExecutorService {
         return ftask;
     }
 
-    protected abstract ExecutorService getThreadPoolExecutor();
+    protected abstract ExecutorService getExecutor();
 
     @Override
     public abstract void execute(Runnable command);
@@ -402,32 +402,32 @@ extends AbstractExecutorService implements ManagedExecutorService {
      */
     protected void executeManagedFutureTask(ManagedFutureTask<?> task) {
         task.submitted();
-        getThreadPoolExecutor().execute(task);
+        getExecutor().execute(task);
     }
  
     @Override
     public boolean awaitTermination(long timeout, TimeUnit unit) throws InterruptedException {
-        return getThreadPoolExecutor().awaitTermination(timeout, unit);
+        return getExecutor().awaitTermination(timeout, unit);
     }
 
     @Override
     public boolean isShutdown() {
-        return getThreadPoolExecutor().isShutdown();
+        return getExecutor().isShutdown();
     }
 
     @Override
     public boolean isTerminated() {
-        return getThreadPoolExecutor().isTerminated();
+        return getExecutor().isTerminated();
     }
 
     @Override
     public void shutdown() {
-        getThreadPoolExecutor().shutdown();
+        getExecutor().shutdown();
     }
 
     @Override
     public List<Runnable> shutdownNow() {
-        List<Runnable> pendingTasks = getThreadPoolExecutor().shutdownNow();
+        List<Runnable> pendingTasks = getExecutor().shutdownNow();
         for (Runnable r: pendingTasks) {
             if (r instanceof ManagedFutureTask) {
                 ((ManagedFutureTask) r).cancel(true);

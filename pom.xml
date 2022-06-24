@@ -50,7 +50,7 @@
 
     <groupId>org.glassfish</groupId>
     <artifactId>javax.enterprise.concurrent</artifactId>
-    <version>1.0.payara-p2</version>
+    <version>1.0.payara-p3</version>
     <packaging>jar</packaging>
     <name>org.glassfish.javax.enterprise.concurrent</name>
     <description>Reference Implementation for JSR 236 - Concurrency Utilities for Java EE</description>

@@ -42,16 +42,11 @@
 
 package org.glassfish.enterprise.concurrent;
 
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.RejectedExecutionHandler;
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import javax.enterprise.concurrent.ManagedExecutorService;
+
+import org.glassfish.enterprise.concurrent.internal.ManagedExecutor;
+import org.glassfish.enterprise.concurrent.internal.ManagedForkJoinPool;
 import org.glassfish.enterprise.concurrent.internal.ManagedFutureTask;
 import org.glassfish.enterprise.concurrent.internal.ManagedThreadPoolExecutor;
 
@@ -60,7 +55,7 @@ import org.glassfish.enterprise.concurrent.internal.ManagedThreadPoolExecutor;
  */
 public class ManagedExecutorServiceImpl extends AbstractManagedExecutorService {
     
-    protected final ManagedThreadPoolExecutor threadPoolExecutor;
+    protected final ManagedExecutor executor;
 
     // The adapter to be returned to the caller needs to have all the lifecycle 
     // methods disabled
@@ -70,6 +65,7 @@ public class ManagedExecutorServiceImpl extends AbstractManagedExecutorService {
             ManagedThreadFactoryImpl managedThreadFactory,
             long hungTaskThreshold,
             boolean longRunningTasks,
+            boolean useForkJoinPool,
             int corePoolSize, int maxPoolSize, long keepAliveTime, 
             TimeUnit keepAliveTimeUnit,
             long threadLifeTime,
@@ -80,10 +76,14 @@ public class ManagedExecutorServiceImpl extends AbstractManagedExecutorService {
                 contextService,
                 contextService != null? contextService.getContextSetupProvider(): null,
                 rejectPolicy);
-        threadPoolExecutor = new ManagedThreadPoolExecutor(corePoolSize, maxPoolSize, 
-                keepAliveTime, keepAliveTimeUnit, queue, 
+        if (useForkJoinPool) {
+            executor = new ManagedForkJoinPool();
+        } else {
+            executor = new ManagedThreadPoolExecutor(corePoolSize, maxPoolSize,
+                keepAliveTime, keepAliveTimeUnit, queue,
                 this.managedThreadFactory);
-        threadPoolExecutor.setThreadLifeTime(threadLifeTime);
+            ((ManagedThreadPoolExecutor) executor).setThreadLifeTime(threadLifeTime);
+        }
         adapter = new ManagedExecutorServiceAdapter(this);
     }
     
@@ -91,6 +91,7 @@ public class ManagedExecutorServiceImpl extends AbstractManagedExecutorService {
             ManagedThreadFactoryImpl managedThreadFactory,
             long hungTaskThreshold,
             boolean longRunningTasks,
+            boolean useForkJoinPool,
             int corePoolSize, int maxPoolSize, long keepAliveTime, 
             TimeUnit keepAliveTimeUnit, 
             long threadLifeTime,
@@ -129,10 +130,14 @@ public class ManagedExecutorServiceImpl extends AbstractManagedExecutorService {
             queue = new ArrayBlockingQueue<>(queueCapacity); 
         }
 
-        threadPoolExecutor = new ManagedThreadPoolExecutor(corePoolSize, maxPoolSize, 
-                keepAliveTime, keepAliveTimeUnit, queue, 
-                this.managedThreadFactory);
-        threadPoolExecutor.setThreadLifeTime(threadLifeTime);
+        if (useForkJoinPool) {
+            executor = new ManagedForkJoinPool();
+        } else {
+            executor = new ManagedThreadPoolExecutor(corePoolSize, maxPoolSize,
+                    keepAliveTime, keepAliveTimeUnit, queue,
+                    this.managedThreadFactory);
+            ((ManagedThreadPoolExecutor) executor).setThreadLifeTime(threadLifeTime);
+        }
         adapter = new ManagedExecutorServiceAdapter(this);
     }
  
@@ -140,7 +145,7 @@ public class ManagedExecutorServiceImpl extends AbstractManagedExecutorService {
     public void execute(Runnable command) {
         ManagedFutureTask<Void> task = getNewTaskFor(command, null);
         task.submitted();
-        threadPoolExecutor.execute(task);
+        ((ExecutorService) executor).execute(task);
     }
 
     /**
@@ -155,8 +160,8 @@ public class ManagedExecutorServiceImpl extends AbstractManagedExecutorService {
     }
 
     @Override
-    protected ExecutorService getThreadPoolExecutor() {
-        return threadPoolExecutor;
+    protected ExecutorService getExecutor() {
+        return (ExecutorService) executor;
     }
 
     @Override
@@ -176,56 +181,56 @@ public class ManagedExecutorServiceImpl extends AbstractManagedExecutorService {
     
     @Override
     public long getTaskCount() {
-        return threadPoolExecutor.getTaskCount();
+        return executor.getTaskCount();
     }
     
     @Override
     public long getCompletedTaskCount() {
-        return threadPoolExecutor.getCompletedTaskCount();
+        return executor.getCompletedTaskCount();
     }
     
     @Override
     public int getCorePoolSize() {
-        return threadPoolExecutor.getCorePoolSize();
+        return executor.getCorePoolSize();
     }
     
     @Override
     public int getActiveCount() {
-        return threadPoolExecutor.getActiveCount();
+        return executor.getActiveCount();
     }
     
     @Override
     public long getKeepAliveTime() {
-        return threadPoolExecutor.getKeepAliveTime(TimeUnit.MILLISECONDS);
+        return executor.getKeepAliveTime(TimeUnit.MILLISECONDS);
     }
     
     @Override
     public int getLargestPoolSize() {
-        return threadPoolExecutor.getLargestPoolSize();
+        return executor.getLargestPoolSize();
     }
     
     @Override
     public int getMaximumPoolSize() {
-        return threadPoolExecutor.getMaximumPoolSize();
+        return executor.getMaximumPoolSize();
     }
     
     @Override
     public int getPoolSize() {
-        return threadPoolExecutor.getPoolSize();
+        return executor.getPoolSize();
     }
     
     @Override
     public BlockingQueue getBlockingQueue() {
-        return threadPoolExecutor.getQueue();
+        return executor.getQueue();
     }
     
     @Override
     public RejectedExecutionHandler getRejectedExecutionHandler() {
-        return threadPoolExecutor.getRejectedExecutionHandler();
+        return executor.getRejectedExecutionHandler();
     }
     
     @Override
     public ThreadFactory getThreadFactory() {
-        return threadPoolExecutor.getThreadFactory();
+        return executor.getThreadFactory();
     }
 }
