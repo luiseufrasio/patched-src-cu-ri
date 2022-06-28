@@ -44,7 +44,7 @@ package org.glassfish.enterprise.concurrent.internal;
 import java.util.concurrent.*;
 
 /**
- * ThreadPoolExecutor for running tasks submitted to ManagedExecutorServiceImpl.
+ * ForkJoinPool for running tasks submitted to ManagedExecutorServiceImpl.
  */
 public class ManagedForkJoinPool extends ForkJoinPool implements ManagedExecutor {
 

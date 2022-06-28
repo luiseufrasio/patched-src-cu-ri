@@ -62,7 +62,7 @@ import org.glassfish.enterprise.concurrent.AbstractManagedThread;
 /**
  * ThreadPoolExecutor for running tasks submitted to ScheduledManagedExecutorServiceImpl.
  */
-public class ManagedScheduledThreadPoolExecutor extends ScheduledThreadPoolExecutor {
+public class ManagedScheduledThreadPoolExecutor extends ScheduledThreadPoolExecutor implements ManagedScheduledExecutor {
 
     private long threadLifeTime = 0L; // in seconds
 
