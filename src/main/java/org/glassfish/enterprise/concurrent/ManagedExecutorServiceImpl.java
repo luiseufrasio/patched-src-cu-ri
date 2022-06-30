@@ -98,21 +98,22 @@ public class ManagedExecutorServiceImpl extends AbstractManagedExecutorService {
             int queueCapacity,
             ContextServiceImpl contextService,
             RejectPolicy rejectPolicy) {
-        super(name, managedThreadFactory, hungTaskThreshold, longRunningTasks,
-                contextService,
-                contextService != null? contextService.getContextSetupProvider(): null,
-                rejectPolicy);
+        this(name, managedThreadFactory, hungTaskThreshold, longRunningTasks, useForkJoinPool, corePoolSize,
+                maxPoolSize, keepAliveTime, keepAliveTimeUnit, threadLifeTime, contextService,
+                rejectPolicy, createQueue(queueCapacity, corePoolSize));
+    }
 
-        // Create a queue for ManagedThreadPoolExecutor based on the values
-        // of corePoolSize and queueCapacity.
-        // If queueCapacity is 0, or
-        // queueCapacity is Integer.MAX_VALUE and corePoolSize is 0,
-        // direct handoff queuing strategy will be used and a
-        // SynchronousQueue will be created.
-        // If queueCapacity is Integer.MAX_VALUE but corePoolSize is not 0,
-        // an unbounded queue will be used.
-        // For any other valid value for queueCapacity, a bounded queue
-        // wil be created.
+    /**
+     * Create a queue for ManagedThreadPoolExecutor based on the values of corePoolSize and queueCapacity.
+     * If queueCapacity is 0, or queueCapacity is Integer.MAX_VALUE and corePoolSize is 0,
+     * direct handoff queuing strategy will be used and a SynchronousQueue will be created.
+     * If queueCapacity is Integer.MAX_VALUE but corePoolSize is not 0, an unbounded queue will be used.
+     * For any other valid value for queueCapacity, a bounded queue wil be created.
+     * @param queueCapacity
+     * @param corePoolSize
+     * @return
+     */
+    private static BlockingQueue<Runnable> createQueue(int queueCapacity, int corePoolSize) {
         if (queueCapacity < 0) {
             throw new IllegalArgumentException();
         }
@@ -127,20 +128,11 @@ public class ManagedExecutorServiceImpl extends AbstractManagedExecutorService {
         } else if (queueCapacity == 0) {
             queue = new SynchronousQueue<>();
         } else {
-            queue = new ArrayBlockingQueue<>(queueCapacity); 
+            queue = new ArrayBlockingQueue<>(queueCapacity);
         }
-
-        if (useForkJoinPool) {
-            executor = new ManagedForkJoinPool();
-        } else {
-            executor = new ManagedThreadPoolExecutor(corePoolSize, maxPoolSize,
-                    keepAliveTime, keepAliveTimeUnit, queue,
-                    this.managedThreadFactory);
-            ((ManagedThreadPoolExecutor) executor).setThreadLifeTime(threadLifeTime);
-        }
-        adapter = new ManagedExecutorServiceAdapter(this);
+        return queue;
     }
- 
+
     @Override
     public void execute(Runnable command) {
         ManagedFutureTask<Void> task = getNewTaskFor(command, null);

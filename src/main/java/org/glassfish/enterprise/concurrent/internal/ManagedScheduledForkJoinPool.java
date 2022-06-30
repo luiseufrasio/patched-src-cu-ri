@@ -289,14 +289,15 @@ public class ManagedScheduledForkJoinPool extends ForkJoinPool implements Manage
             if (other instanceof ManagedScheduledFutureTask) {
                 ManagedScheduledFutureTask<?> x = (ManagedScheduledFutureTask<?>) other;
                 long diff = nextRunTime - x.nextRunTime;
-                if (diff < 0)
+                if (diff < 0) {
                     return -1;
-                else if (diff > 0)
+                } else if (diff > 0) {
                     return 1;
-                else if (sequenceNumber < x.sequenceNumber)
+                } else if (sequenceNumber < x.sequenceNumber) {
                     return -1;
-                else
+                } else {
                     return 1;
+                }
             }
             long d = (getDelay(TimeUnit.NANOSECONDS) -
                     other.getDelay(TimeUnit.NANOSECONDS));
