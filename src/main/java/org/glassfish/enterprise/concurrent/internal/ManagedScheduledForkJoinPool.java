@@ -47,11 +47,9 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * ForkJoinPool for running tasks submitted to ManagedExecutorServiceImpl.
+ * ForkJoinPool for running tasks submitted to ManagedScheduledExecutorServiceImpl.
  */
 public class ManagedScheduledForkJoinPool extends ForkJoinPool implements ManagedScheduledExecutor {
-
-    private long threadLifeTime = 0L; // in seconds
 
     public ManagedScheduledForkJoinPool() {
         super();
@@ -109,7 +107,7 @@ public class ManagedScheduledForkJoinPool extends ForkJoinPool implements Manage
 
     @Override
     public long getTaskCount() {
-        return getQueuedTaskCount();
+        return super.getQueuedTaskCount();
     }
 
     @Override
