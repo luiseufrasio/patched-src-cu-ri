@@ -42,14 +42,13 @@
 
 package org.glassfish.enterprise.concurrent;
 
-import java.util.concurrent.*;
+import org.glassfish.enterprise.concurrent.internal.ManagedFutureTask;
+import org.glassfish.enterprise.concurrent.internal.ManagedScheduledThreadPoolExecutor;
+
 import javax.enterprise.concurrent.ManagedExecutorService;
 import javax.enterprise.concurrent.ManagedScheduledExecutorService;
 import javax.enterprise.concurrent.Trigger;
-import org.glassfish.enterprise.concurrent.internal.ManagedFutureTask;
-import org.glassfish.enterprise.concurrent.internal.ManagedScheduledExecutor;
-import org.glassfish.enterprise.concurrent.internal.ManagedScheduledForkJoinPool;
-import org.glassfish.enterprise.concurrent.internal.ManagedScheduledThreadPoolExecutor;
+import java.util.concurrent.*;
 
 /**
  * Implementation of ManagedScheduledExecutorService interface
@@ -57,15 +56,14 @@ import org.glassfish.enterprise.concurrent.internal.ManagedScheduledThreadPoolEx
 public class ManagedScheduledExecutorServiceImpl extends AbstractManagedExecutorService 
     implements ManagedScheduledExecutorService {
 
-    protected ManagedScheduledExecutor executor;
+    protected ManagedScheduledThreadPoolExecutor executor;
     protected final ManagedScheduledExecutorServiceAdapter adapter;
 
     public ManagedScheduledExecutorServiceImpl(String name, 
             ManagedThreadFactoryImpl managedThreadFactory, 
             long hungTaskThreshold, 
             boolean longRunningTasks,
-            boolean useForkJoinPool,
-            int corePoolSize, 
+            int corePoolSize,
             long keepAliveTime, 
             TimeUnit keepAliveTimeUnit,
             long threadLifeTime,
@@ -75,14 +73,10 @@ public class ManagedScheduledExecutorServiceImpl extends AbstractManagedExecutor
                 contextService,
                 contextService != null? contextService.getContextSetupProvider(): null,
                 rejectPolicy);
-        if (useForkJoinPool) {
-            executor = new ManagedScheduledForkJoinPool();
-        } else {
-            executor = new ManagedScheduledThreadPoolExecutor(corePoolSize,
-                    this.managedThreadFactory);
-            ((ManagedScheduledThreadPoolExecutor) executor).setKeepAliveTime(keepAliveTime, keepAliveTimeUnit);
-            ((ManagedScheduledThreadPoolExecutor) executor).setThreadLifeTime(threadLifeTime);
-        }
+        executor = new ManagedScheduledThreadPoolExecutor(corePoolSize,
+                this.managedThreadFactory);
+        executor.setKeepAliveTime(keepAliveTime, keepAliveTimeUnit);
+        executor.setThreadLifeTime(threadLifeTime);
         adapter = new ManagedScheduledExecutorServiceAdapter(this);
     }
     

@@ -52,9 +52,7 @@ public class ManagedScheduledExecutorServiceImplTest extends ManagedExecutorServ
 
     protected ManagedExecutorService createManagedExecutor(String name, ContextSetupProvider contextCallback) {
         return new ManagedScheduledExecutorServiceImpl(name, null, 0, false,
-                    false, 1,
-                    0, TimeUnit.SECONDS,
-                    0L,
+                    1,0, TimeUnit.SECONDS,0L,
                     new TestContextService(contextCallback),
                     RejectPolicy.ABORT);
     }
