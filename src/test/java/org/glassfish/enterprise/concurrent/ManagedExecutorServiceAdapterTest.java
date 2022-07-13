@@ -976,7 +976,7 @@ public class ManagedExecutorServiceAdapterTest  {
     protected ManagedExecutorService createManagedExecutor(String name, 
             ContextSetupProvider contextSetupProvider) {
         ManagedExecutorServiceImpl mes = 
-                new ManagedExecutorServiceImpl(name, null, 0, false,
+                new ManagedExecutorServiceImpl(name, null, 0, false, false,
                     1, 1,  
                     0, TimeUnit.SECONDS, 
                     0L,

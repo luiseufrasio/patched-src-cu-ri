@@ -242,7 +242,7 @@ public class ManagedExecutorServiceImplTest {
         BlockingQueue<Runnable> queue = new ArrayBlockingQueue<>(QUEUE_SIZE);
         ManagedExecutorServiceImpl mes = 
                 new ManagedExecutorServiceImpl("mes", null, 0, false,
-                1, 10, 0, TimeUnit.SECONDS, 0L,
+                        false,1, 10, 0, TimeUnit.SECONDS, 0L,
                 new TestContextService(null), RejectPolicy.ABORT,
                 queue);
         assertEquals(queue, getQueue(mes));
@@ -280,7 +280,7 @@ public class ManagedExecutorServiceImplTest {
     public void testThreadLifeTime() {
         final AbstractManagedExecutorService mes = 
                 createManagedExecutor("testThreadLifeTime", 
-                1, 2, 0, 3L, 0L, false);
+                1, 2, 0, 3L, 0L, false, false);
         
         Collection<AbstractManagedThread> threads = mes.getThreads();
         assertNull(threads);
@@ -309,7 +309,7 @@ public class ManagedExecutorServiceImplTest {
     public void testHungThreads() {
         final AbstractManagedExecutorService mes = 
                 createManagedExecutor("testThreadLifeTime", 
-                1, 2, 0, 0L, 1L, false);
+                1, 2, 0, 0L, 1L, false, false);
         
         Collection<AbstractManagedThread> threads = mes.getHungThreads();
         assertNull(threads);
@@ -338,7 +338,7 @@ public class ManagedExecutorServiceImplTest {
     public void testHungThreads_LongRunningTasks() {
         final AbstractManagedExecutorService mes = 
                 createManagedExecutor("testThreadLifeTime", 
-                1, 2, 0, 0L, 1L, true);
+                1, 2, 0, 0L, 1L, true, false);
         
         Collection<AbstractManagedThread> threads = mes.getHungThreads();
         assertNull(threads);
@@ -365,7 +365,7 @@ public class ManagedExecutorServiceImplTest {
         
     protected ManagedExecutorService createManagedExecutor(String name, 
             ContextSetupProvider contextCallback) {
-        return new ManagedExecutorServiceImpl(name, null, 0, false,
+        return new ManagedExecutorServiceImpl(name, null, 0, false, false,
                 1, 1,  
                 0, TimeUnit.SECONDS,
                 0L,
@@ -377,14 +377,14 @@ public class ManagedExecutorServiceImplTest {
     protected ManagedExecutorServiceImpl createManagedExecutor(String name,
         int corePoolSize, int maxPoolSize, int queueSize) {
         return createManagedExecutor(name, corePoolSize, maxPoolSize,
-                queueSize, 0L, 0L, false);
+                queueSize, 0L, 0L, false, false);
     }
 
     protected ManagedExecutorServiceImpl createManagedExecutor(String name,
             int corePoolSize, int maxPoolSize, int queueSize, long threadLifeTime, 
-            long hungTask, boolean longRunningTasks) {
+            long hungTask, boolean longRunningTasks, boolean useForkJoinPool) {
         return new ManagedExecutorServiceImpl(name, null, hungTask,
-                longRunningTasks,
+                longRunningTasks, useForkJoinPool,
                 corePoolSize, maxPoolSize,  
                 0, TimeUnit.SECONDS,
                 threadLifeTime,
@@ -394,7 +394,7 @@ public class ManagedExecutorServiceImplTest {
     }
     
     BlockingQueue<Runnable> getQueue(ManagedExecutorServiceImpl mes) {
-        ThreadPoolExecutor executor = (ThreadPoolExecutor) mes.getThreadPoolExecutor();
+        ThreadPoolExecutor executor = (ThreadPoolExecutor) mes.getExecutor();
         return executor.getQueue();
     }
 

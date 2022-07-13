@@ -737,7 +737,7 @@ public class ManagedScheduledExecutorServiceAdapterTest extends ManagedExecutorS
     protected ManagedExecutorService createManagedExecutor(String name, ContextSetupProvider contextSetupProvider) {
         ManagedScheduledExecutorServiceImpl mses = 
                 new ManagedScheduledExecutorServiceImpl(name, null, 0, false,
-                    1,  
+                    1,
                     0, TimeUnit.SECONDS,
                     0L,
                     new TestContextService(contextSetupProvider),
